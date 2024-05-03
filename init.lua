@@ -1,4 +1,4 @@
--- Set <space> as the leader key
+--    et <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
@@ -27,14 +27,6 @@ vim.opt.showmode = false
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.opt.clipboard = 'unnamedplus'
-
--- Enable break indent
-vim.opt.breakindent = true
-
--- Save undo history
-vim.opt.undofile = true
-
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -169,7 +161,7 @@ require('lazy').setup({
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
-      current_line_blame = false,
+      current_line_blame = true,
     },
   },
 
@@ -210,6 +202,7 @@ require('lazy').setup({
       }, { mode = 'v' })
     end,
   },
+
   { -- Status line plugin
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
@@ -231,29 +224,7 @@ require('lazy').setup({
       lualine_z = { 'location' },
     },
   },
-  { -- Autopairs, a super powerful autopair plugin for Neovim that supports multiple characters
-    'windwp/nvim-autopairs',
-    event = 'InsertEnter',
-    config = true,
-    opts = {
-      disable_filetype = { 'TelescopePrompt', 'spectre_panel' },
-      disable_in_macro = true, -- disable when recording or executing a macro
-      disable_in_visualblock = false, -- disable when insert after visual block mode
-      disable_in_replace_mode = true,
-      ignored_next_char = [=[[%w%%%'%[%"%.%`%$]]=],
-      enable_moveright = true,
-      enable_afterquote = true, -- add bracket pairs after quote
-      enable_check_bracket_line = true, --- check bracket in same line
-      enable_bracket_in_quote = true, --
-      enable_abbr = false, -- trigger abbreviation
-      break_undo = true, -- switch for basic rule break undo sequence
-      check_ts = false,
-      map_cr = true,
-      map_bs = true, -- map the <BS> key
-      map_c_h = false, -- Map the <C-h> key to delete a pair
-      map_c_w = false, -- map <c-w> to delete a pair if possible
-    },
-  },
+
   { -- Tabline plugin with re-orderable, auto-sizing, clickable tabs, icons, nice highlighting jump-to-buffer mode.
     'romgrk/barbar.nvim',
     dependencies = {
@@ -264,13 +235,56 @@ require('lazy').setup({
       vim.g.barbar_auto_setup = false
     end,
     opts = {
-      -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
+      -- lazy.nvim will automatically call setup for you. put your options here,
+      -- anything missing will use the default:
       -- animation = true,
       -- insert_at_start = true,
       -- …etc.
     },
     version = '^1.0.0', -- optional: only update when a new 1.x version is released
   },
+
+  { -- Distraction free mode
+    'folke/zen-mode.nvim',
+    config = function() -- This is the function that runs, AFTER loading
+      vim.keymap.set('n', '<leader>z', '<Cmd>ZenMode<CR>', { desc = '[z] Zen mode' })
+    end,
+  },
+
+  { -- Add indentation guides even on blank lines
+    'lukas-reineke/indent-blankline.nvim',
+    main = 'ibl',
+    opts = {},
+    config = function()
+      local highlight = {
+        'DraculaDarkGray',
+      }
+
+      local hooks = require 'ibl.hooks'
+      -- create the highlight groups in the highlight setup hook, so they are reset
+      -- every time the colorscheme changes
+      hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+        vim.api.nvim_set_hl(0, 'DraculaDarkGray', { fg = '#000000' })
+      end)
+
+      require('ibl').setup { indent = { highlight = highlight } }
+    end,
+  },
+
+  { -- A super powerful autopair plugin for Neovim that supports multiple characters.
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    -- Optional dependency
+    dependencies = { 'hrsh7th/nvim-cmp' },
+    config = function()
+      require('nvim-autopairs').setup {}
+      -- If you want to automatically add `(` after selecting a function or method
+      local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
+      local cmp = require 'cmp'
+      cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+    end,
+  },
+
   { -- Neo-tree is a Neovim plugin to browse the file system and other tree like structures in whatever style suits you
     'nvim-neo-tree/neo-tree.nvim',
     branch = 'v3.x',
@@ -647,7 +661,9 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { { 'prettierd', 'prettier' } },
+        javascript = { 'prettierd', 'prettier' },
+        typescript = { 'prettierd', 'prettier' },
+        css = { 'stylelint', 'prettierd' },
       },
     },
   },
@@ -672,12 +688,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',
@@ -723,9 +739,9 @@ require('lazy').setup({
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          ['<CR>'] = cmp.mapping.confirm { select = true },
+          ['<Tab>'] = cmp.mapping.select_next_item(),
+          ['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
@@ -777,6 +793,7 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
+  -- Github Copilot integration
   { 'github/copilot.vim' },
 
   { -- Collection of various small independent plugins/modules
@@ -818,6 +835,10 @@ require('lazy').setup({
         'typescript',
         'css',
       },
+      -- Autoclose and autorename html tag
+      autotag = {
+        enable = true,
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -856,10 +877,10 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   require 'kickstart.plugins.debug',
-  require 'kickstart.plugins.indent_line',
+  -- require 'kickstart.plugins.indent_line',
   require 'kickstart.plugins.lint',
-  require 'kickstart.plugins.autopairs',
-  --require 'kickstart.plugins.neo-tree',
+  -- require 'kickstart.plugins.autopairs',
+  -- require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
