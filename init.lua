@@ -294,6 +294,22 @@ require('lazy').setup({
       'MunifTanjim/nui.nvim',
       '3rd/image.nvim', -- Optional image support in preview window: See `# Preview Mode` for more information
     },
+    opts = {
+      filesystem = {
+        filtered_items = {
+          visible = true,
+          show_hidden_count = true,
+          hide_dotfiles = false,
+          hide_gitignored = false,
+          hide_by_name = {
+            -- '.git',
+            -- '.DS_Store',
+            -- 'thumbs.db',
+          },
+          never_show = {},
+        },
+      },
+    },
     config = function() -- This is the function that runs, AFTER loading
       vim.keymap.set('n', '<leader>,', '<Cmd>Neotree show<CR>', { desc = '[,] Open file tree sidebar' })
       vim.keymap.set('n', '<leader>.', '<Cmd>Neotree close<CR>', { desc = '[.] Close file tree sidebar' })
