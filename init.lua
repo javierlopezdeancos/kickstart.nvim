@@ -1,3 +1,5 @@
+local defaults = { noremap = true, silent = true }
+
 --    et <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -73,6 +75,13 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagn
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Copy to clipboard in visual mode
+vim.keymap.set('v', '<leader>c', '"+y', { desc = 'Copy to clipboard' })
+vim.keymap.set('n', '<leader>p', '"+p', { desc = 'Paste to clipboard' })
+
+-- Remove selection in visual mode
+vim.keymap.set('v', '<leader>d', '"+d', { desc = 'Delete selection' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -91,6 +100,14 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+--
+--  See `:help wincmd` for a list of all window commands
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+--
+--  See `:help wincmd` for a list of all window commands:
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
@@ -195,11 +212,26 @@ require('lazy').setup({
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
         ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+        ['<leader>x'] = { name = '[x] Terminal', _ = 'which_key_ignore' },
+        ['<leader>v'] = { name = '[v] Copy and paste selected text', _ = 'which_key_ignore' },
       }
       -- visual mode
       require('which-key').register({
         ['<leader>h'] = { 'Git [H]unk' },
       }, { mode = 'v' })
+    end,
+  },
+
+  {
+    -- You can easily change to a different colorscheme.
+    -- Change the name of the colorscheme plugin below, and then
+    -- change the command in the config to whatever the name of that colorscheme is.
+    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+
+    'Mofiqul/dracula.nvim',
+    priority = 1000, -- Make sure to load this before all the other start plugins.
+    init = function()
+      vim.cmd.colorscheme 'dracula'
     end,
   },
 
@@ -223,6 +255,22 @@ require('lazy').setup({
       lualine_y = { 'progress' },
       lualine_z = { 'location' },
     },
+  },
+
+  -- {
+  --  'bennypowers/webc.nvim',
+  --  dependencies = { 'nvim-treesitter/nvim-treesitter' },
+  -- },
+
+  { -- Persist and toggle multiple terminals during an editing session
+    'akinsho/toggleterm.nvim',
+    version = '*',
+    config = function()
+      require('toggleterm').setup()
+      vim.keymap.set('n', '<leader>xh', '<Cmd>ToggleTerm show direction=horizontal<CR>', { desc = '[h] Open horizontal terminal' })
+      vim.keymap.set('n', '<leader>xc', '<Cmd>ToggleTerm close<CR>', { desc = '[c] Close terminal' })
+      vim.keymap.set('n', '<leader>xv', '<Cmd>ToggleTerm show direction=vertical<CR>', { desc = '[v] Open vertical terminal' })
+    end,
   },
 
   { -- Tabline plugin with re-orderable, auto-sizing, clickable tabs, icons, nice highlighting jump-to-buffer mode.
@@ -285,6 +333,55 @@ require('lazy').setup({
     end,
   },
 
+  {
+    'brenoprata10/nvim-highlight-colors',
+    opts = {
+      ---Render style
+      ---@usage 'background'|'foreground'|'virtual'
+      render = 'background',
+
+      ---Set virtual symbol (requires render to be set to 'virtual')
+      virtual_symbol = '■',
+      ---Set virtual symbol suffix (defaults to '')
+      virtual_symbol_prefix = '',
+      ---Set virtual symbol suffix (defaults to ' ')
+      virtual_symbol_suffix = ' ',
+      ---Set virtual symbol position()
+      ---@usage 'inline'|'eol'|'eow'
+      ---inline mimics VS Code style
+      ---eol stands for `end of column` - Recommended to set `virtual_symbol_suffix = ''` when used.
+      ---eow stands for `end of word` - Recommended to set `virtual_symbol_prefix = ' ' and virtual_symbol_suffix = ''` when used.
+      virtual_symbol_position = 'inline',
+      ---Highlight hex colors, e.g. '#FFFFFF'
+      enable_hex = true,
+      ---Highlight short hex colors e.g. '#fff'
+      enable_short_hex = true,
+      ---Highlight rgb colors, e.g. 'rgb(0 0 0)'
+      enable_rgb = true,
+      ---Highlight hsl colors, e.g. 'hsl(150deg 30% 40%)'
+      enable_hsl = true,
+      ---Highlight CSS variables, e.g. 'var(--testing-color)'
+      enable_var_usage = true,
+      ---Highlight named colors, e.g. 'green'
+      enable_named_colors = true,
+      ---Highlight tailwind colors, e.g. 'bg-blue-500'
+      enable_tailwind = true,
+      ---Set custom colors
+      ---Label must be properly escaped with '%' to adhere to `string.gmatch`
+      --- :help string.gmatch
+      custom_colors = {
+        { label = '%-%-theme%-primary%-color', color = '#0f1219' },
+        { label = '%-%-theme%-secondary%-color', color = '#5a5d64' },
+      },
+      -- Exclude filetypes or buftypes from highlighting
+      -- Note: terminal buffers are always excluded due to instability
+      exclude = {
+        filetypes = {},
+        buftypes = {},
+      },
+    },
+  },
+
   { -- Neo-tree is a Neovim plugin to browse the file system and other tree like structures in whatever style suits you
     'nvim-neo-tree/neo-tree.nvim',
     branch = 'v3.x',
@@ -301,18 +398,14 @@ require('lazy').setup({
           show_hidden_count = true,
           hide_dotfiles = false,
           hide_gitignored = false,
-          hide_by_name = {
-            -- '.git',
-            -- '.DS_Store',
-            -- 'thumbs.db',
-          },
-          never_show = {},
         },
       },
     },
     config = function() -- This is the function that runs, AFTER loading
-      vim.keymap.set('n', '<leader>,', '<Cmd>Neotree show<CR>', { desc = '[,] Open file tree sidebar' })
-      vim.keymap.set('n', '<leader>.', '<Cmd>Neotree close<CR>', { desc = '[.] Close file tree sidebar' })
+      vim.keymap.set('n', '<leader>.', '<Cmd>Neotree show<CR>', { desc = '[,] Open file tree sidebar' })
+      vim.keymap.set('n', '<leader>,', '<Cmd>Neotree close<CR>', { desc = '[.] Close file tree sidebar' })
+      vim.keymap.set('n', '<C-,>', '<Cmd>Neotree close<CR>', defaults)
+      vim.keymap.set('n', '<C-.>', '<Cmd>Neotree show<CR>', defaults)
     end,
   },
 
@@ -645,6 +738,54 @@ require('lazy').setup({
     end,
   },
 
+  { -- TypeScript Tools LSP etc
+    'pmizio/typescript-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    opts = {
+      -- spawn additional tsserver instance to calculate diagnostics on it
+      separate_diagnostic_server = true,
+      -- "change"|"insert_leave" determine when the client asks the server about diagnostic
+      publish_diagnostic_on = 'insert_leave',
+      -- array of strings("fix_all"|"add_missing_imports"|"remove_unused"|
+      -- "remove_unused_imports"|"organize_imports") -- or string "all"
+      -- to include all supported code actions
+      -- specify commands exposed as code_actions
+      expose_as_code_action = {},
+      -- string|nil - specify a custom path to `tsserver.js` file, if this is nil or file under path
+      -- not exists then standard path resolution strategy is applied
+      tsserver_path = nil,
+      -- specify a list of plugins to load by tsserver, e.g., for support `styled-components`
+      -- (see 💅 `styled-components` support section)
+      tsserver_plugins = {},
+      -- this value is passed to: https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-megabytes
+      -- memory limit in megabytes or "auto"(basically no limit)
+      tsserver_max_memory = 'auto',
+      -- described below
+      tsserver_format_options = {},
+      tsserver_file_preferences = {},
+      -- locale of all tsserver messages, supported locales you can find here:
+      -- https://github.com/microsoft/TypeScript/blob/3c221fc086be52b19801f6e8d82596d04607ede6/src/compiler/utilitiesPublic.ts#L620
+      tsserver_locale = 'en',
+      -- mirror of VSCode's `typescript.suggest.completeFunctionCalls`
+      complete_function_calls = false,
+      include_completions_with_insert_text = true,
+      -- CodeLens
+      -- WARNING: Experimental feature also in VSCode, because it might hit performance of server.
+      -- possible values: ("off"|"all"|"implementations_only"|"references_only")
+      code_lens = 'off',
+      -- by default code lenses are displayed on all referencable values and for some of you it can
+      -- be too much this option reduce count of them by removing member references from lenses
+      disable_member_code_lens = true,
+      -- JSXCloseTag
+      -- WARNING: it is disabled by default (maybe you configuration or distro already uses nvim-ts-autotag,
+      -- that maybe have a conflict if enable this feature. )
+      jsx_close_tag = {
+        enable = true,
+        filetypes = { 'javascriptreact', 'typescriptreact' },
+      },
+    },
+  },
+
   { -- Autoformat
     'stevearc/conform.nvim',
     lazy = false,
@@ -794,23 +935,17 @@ require('lazy').setup({
       }
     end,
   },
-  {
-    -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'Mofiqul/dracula.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      vim.cmd.colorscheme 'dracula'
-    end,
-  },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    'folke/todo-comments.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    opts = { signs = false },
+  },
 
   -- Github Copilot integration
-  { 'github/copilot.vim' },
+  -- { 'github/copilot.vim' }, --
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
