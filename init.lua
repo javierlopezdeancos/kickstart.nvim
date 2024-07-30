@@ -70,17 +70,20 @@ vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
+vim.keymap.set('n', '<leader>dp', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
+vim.keymap.set('n', '<leader>dn', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
+vim.keymap.set('n', '<leader>de', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>dq', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 -- Copy to clipboard in visual mode
-vim.keymap.set('v', '<leader>c', '"+y', { desc = 'Copy to clipboard' })
-vim.keymap.set('n', '<leader>p', '"+p', { desc = 'Paste to clipboard' })
-
+vim.keymap.set('v', '<leader>ec', '"+y', { desc = 'copy to clipboard' })
+vim.keymap.set('n', '<leader>ep', '"+p', { desc = 'paste to clipboard' })
+vim.keymap.set('v', '<C-c>', '"+y', { desc = 'copy to clipboard' })
+vim.keymap.set('n', '<C-v>', '"+p', { desc = 'paste to clipboard' })
 -- Remove selection in visual mode
-vim.keymap.set('v', '<leader>d', '"+d', { desc = 'Delete selection' })
+vim.keymap.set('v', '<leader>ed', '"+d', { desc = 'delete selection' })
+vim.keymap.set('v', '<C-d>', '"+d', { desc = 'delete selection' })
+-- Search files in telescope
+vim.keymap.set('n', '<C-f>', '<cmd>Telescope find_files<cr>', { desc = 'search files in telescope' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -88,7 +91,7 @@ vim.keymap.set('v', '<leader>d', '"+d', { desc = 'Delete selection' })
 --
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'exit terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -182,6 +185,43 @@ require('lazy').setup({
     },
   },
 
+  { -- Useful plugin to show you pending keybinds.
+    'folke/which-key.nvim',
+    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
+    config = function() -- This is the function that runs, AFTER loading
+      require('which-key').setup()
+
+      -- Document existing key chains
+      require('which-key').add {
+        {'<leader>c', group = 'code', desc = 'code' },
+        {"<leader>f", group = "file" }, -- group
+        {"<leader>ff", "<cmd>Telescope find_files<cr>", desc = "find file", mode = "n" },
+        {"<leader>fn", desc = "new file" },
+        {'<leader>fd', group = 'file', desc = 'document' },
+        {'<leader>fr', group = 'file', desc = 'rename file' },
+        {'<leader>fs', group = 'find', desc = 'search' },
+        {'<leader>fw', group = 'file', desc = 'workspace' },
+        {"<leader>v", group = "view" }, -- group
+        {'<leader>vt', group = 'view', desc="Toggle slide left tree"},
+        {"<leader>x", group = "terminal" }, -- group
+        {'<leader>xh', group = 'terminal', '<Cmd>ToggleTerm show direction=horizontal<CR>', desc="open horizontal terminal" },
+        {'<leader>xv', group = 'terminal', '<Cmd>ToggleTerm show direction=vertical<CR>', desc="open vertical terminal" },
+        {'<leader>xc', group = 'terminal', '<Cmd>ToggleTerm close<CR>', desc="close terminal" },
+        {"<leader>g", group = "git" }, -- group
+        {'<leader>gh', group = 'git', desc = 'git hunk' },
+        {"<leader>e", group = "edit" }, -- group
+        {'<leader>ec', group = 'edit', desc="Copy to clipboard", mode="v"},
+        {'<leader>ep', group = 'edit', desc="Paste from clipboard", mode="n"},
+        {'<leader>ed', group = 'edit', desc="Delete selection"},
+        {"<leader>d", group = "diagnostic"}, -- group
+        {'<leader>dp', group = 'diagnostic', desc = 'go to previous diagnostic message'},
+        {'<leader>dn', group = 'diagnostic', desc = 'go to next diagnostic message'},
+        {'<leader>de', group = 'diagnostic', desc = 'show diagnostic error messages'},
+        {'<leader>dq', group = 'diagnostic', desc = 'open diagnostic quickfix list'},
+      }
+    end,
+  },
+
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle
@@ -196,32 +236,6 @@ require('lazy').setup({
   -- Then, because we use the `config` key, the configuration only runs
   -- after the plugin has been loaded:
   --  config = function() ... end
-
-  { -- Useful plugin to show you pending keybinds.
-    'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-        ['<leader>x'] = { name = '[x] Terminal', _ = 'which_key_ignore' },
-        ['<leader>v'] = { name = '[v] Copy and paste selected text', _ = 'which_key_ignore' },
-      }
-      -- visual mode
-      require('which-key').register({
-        ['<leader>h'] = { 'Git [H]unk' },
-      }, { mode = 'v' })
-    end,
-  },
-
   {
     -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
@@ -398,6 +412,12 @@ require('lazy').setup({
           show_hidden_count = true,
           hide_dotfiles = false,
           hide_gitignored = false,
+          hide_by_name = {
+            -- '.git',
+            -- '.DS_Store',
+            -- 'thumbs.db',
+          },
+          never_show = {},
         },
       },
     },
@@ -466,12 +486,13 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
+        --defaults = {
         --   mappings = {
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
-        -- pickers = {}
+        -- pickers = {
+        -- },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
