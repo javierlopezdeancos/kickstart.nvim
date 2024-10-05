@@ -185,6 +185,13 @@ require('lazy').setup({
     },
   },
 
+  -- Diff view.
+  -- Single tabpage interface for easily cycling through diffs for all modified
+  -- files for any git rev.
+  {
+    'sindrets/diffview.nvim',
+  },
+
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
@@ -193,31 +200,31 @@ require('lazy').setup({
 
       -- Document existing key chains
       require('which-key').add {
-        {'<leader>c', group = 'code', desc = 'code' },
-        {"<leader>f", group = "file" }, -- group
-        {"<leader>ff", "<cmd>Telescope find_files<cr>", desc = "find file", mode = "n" },
-        {"<leader>fn", desc = "new file" },
-        {'<leader>fd', group = 'file', desc = 'document' },
-        {'<leader>fr', group = 'file', desc = 'rename file' },
-        {'<leader>fs', group = 'find', desc = 'search' },
-        {'<leader>fw', group = 'file', desc = 'workspace' },
-        {"<leader>v", group = "view" }, -- group
-        {'<leader>vt', group = 'view', desc="Toggle slide left tree"},
-        {"<leader>x", group = "terminal" }, -- group
-        {'<leader>xh', group = 'terminal', '<Cmd>ToggleTerm show direction=horizontal<CR>', desc="open horizontal terminal" },
-        {'<leader>xv', group = 'terminal', '<Cmd>ToggleTerm show direction=vertical<CR>', desc="open vertical terminal" },
-        {'<leader>xc', group = 'terminal', '<Cmd>ToggleTerm close<CR>', desc="close terminal" },
-        {"<leader>g", group = "git" }, -- group
-        {'<leader>gh', group = 'git', desc = 'git hunk' },
-        {"<leader>e", group = "edit" }, -- group
-        {'<leader>ec', group = 'edit', desc="Copy to clipboard", mode="v"},
-        {'<leader>ep', group = 'edit', desc="Paste from clipboard", mode="n"},
-        {'<leader>ed', group = 'edit', desc="Delete selection"},
-        {"<leader>d", group = "diagnostic"}, -- group
-        {'<leader>dp', group = 'diagnostic', desc = 'go to previous diagnostic message'},
-        {'<leader>dn', group = 'diagnostic', desc = 'go to next diagnostic message'},
-        {'<leader>de', group = 'diagnostic', desc = 'show diagnostic error messages'},
-        {'<leader>dq', group = 'diagnostic', desc = 'open diagnostic quickfix list'},
+        { '<leader>c', group = 'code', desc = 'code' },
+        { '<leader>f', group = 'file' }, -- group
+        { '<leader>ff', '<cmd>Telescope find_files<cr>', desc = 'find file', mode = 'n' },
+        { '<leader>fn', desc = 'new file' },
+        { '<leader>fd', group = 'file', desc = 'document' },
+        { '<leader>fr', group = 'file', desc = 'rename file' },
+        { '<leader>fs', group = 'find', desc = 'search' },
+        { '<leader>fw', group = 'file', desc = 'workspace' },
+        { '<leader>v', group = 'view' }, -- group
+        { '<leader>vt', group = 'view', desc = 'Toggle slide left tree' },
+        { '<leader>x', group = 'terminal' }, -- group
+        { '<leader>xh', group = 'terminal', '<Cmd>ToggleTerm show direction=horizontal<CR>', desc = 'open horizontal terminal' },
+        { '<leader>xv', group = 'terminal', '<Cmd>ToggleTerm show direction=vertical<CR>', desc = 'open vertical terminal' },
+        { '<leader>xc', group = 'terminal', '<Cmd>ToggleTerm close<CR>', desc = 'close terminal' },
+        { '<leader>g', group = 'git' }, -- group
+        { '<leader>gh', group = 'git', desc = 'git hunk' },
+        { '<leader>e', group = 'edit' }, -- group
+        { '<leader>ec', group = 'edit', desc = 'Copy to clipboard', mode = 'v' },
+        { '<leader>ep', group = 'edit', desc = 'Paste from clipboard', mode = 'n' },
+        { '<leader>ed', group = 'edit', desc = 'Delete selection' },
+        { '<leader>d', group = 'diagnostic' }, -- group
+        { '<leader>dp', group = 'diagnostic', desc = 'go to previous diagnostic message' },
+        { '<leader>dn', group = 'diagnostic', desc = 'go to next diagnostic message' },
+        { '<leader>de', group = 'diagnostic', desc = 'show diagnostic error messages' },
+        { '<leader>dq', group = 'diagnostic', desc = 'open diagnostic quickfix list' },
       }
     end,
   },
@@ -246,6 +253,20 @@ require('lazy').setup({
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
       vim.cmd.colorscheme 'dracula'
+    end,
+  },
+
+  { -- Fold plugin
+    'kevinhwang91/nvim-ufo',
+    dependencies = { 'kevinhwang91/promise-async' },
+    event = 'BufRead',
+    config = function()
+      vim.o.foldcolumn = '1'
+      vim.o.foldlevel = 99
+      vim.o.foldlevelstart = 99
+      vim.o.foldenable = true
+
+      require('ufo').setup()
     end,
   },
 
